@@ -1,0 +1,90 @@
+//Script for the Google spreadsheet
+
+/*
+Resources:
+ //http://ctrlq.org/code/19319-website-monitor-script
+ 
+ //http://www.labnol.org/internet/monitor-web-pages-changes-with-google-docs/4536/
+ //SMS messages using Google calendars
+ //http://www.labnol.org/internet/website-uptime-monitor/21060/
+ */
+function classMonitor()
+{ 
+ var sheet = SpreadsheetApp.getActiveSheet();
+  
+  //timestamp
+  var time  = new Date(); 
+  var now   = new Date(time.getTime() + 10000);
+  sheet.getRange("D1").setValue(now);
+  
+  // The script can monitor multiple website URLs (comma separated)
+  var class = new Array();
+  var status = new Array();
+  class[0] = sheet.getRange("A7").getValue();
+  status[0] = sheet.getRange("B7").getValue();
+    
+  class[1]  = sheet.getRange("A8").getValue();
+  status[1] = sheet.getRange("B8").getValue();
+  
+  class[2] = sheet.getRange("A9").getValue();
+  status[2] = sheet.getRange("B9").getValue();
+  
+  class[3] = sheet.getRange("A10").getValue();
+  status[3] = sheet.getRange("B10").getValue();
+
+ 
+  for(var i=0; i<3; i++)
+  {
+    //cannot find
+    if(status[i].search("open") == -1) {
+      status[i] = "closed";
+   }
+   else{
+     status[i] = "open";  //open or waitlist
+   }
+    
+    updateLog(class[i], status[i]);
+  }
+}
+ 
+function updateLog(class, status) {  
+   
+   //don't do anything if the class is closed
+  if(status == "closed")
+    return;
+    
+   var sheet = SpreadsheetApp.getActiveSheet();
+  var time  = new Date();  
+    
+  var closed = "closed";
+ 
+  var msg = class + " is open!";
+    
+  // Send an email notification when the site status changes
+  //the user email is in B1
+  var email = sheet.getRange("C1").getValue();  
+  var phone = sheet.getRange("C2").getValue(); 
+  
+  //send email notification
+  if (sheet.getRange("B1").getValue().toLowerCase() == "yes" && status != closed) 
+  {
+    MailApp.sendEmail(email, msg, status);
+  }
+  
+  //send SMS notification
+   if (sheet.getRange("B2").getValue().toLowerCase() == "yes" && status != closed) 
+  {
+    MailApp.sendEmail(phone, msg, "ursa.ucla.edu/");
+  }
+  
+  
+  //MailApp.sendEmail(rowData.emailAddress, emailSubject, emailText);
+  
+  var now   = new Date(time.getTime() + 10000);
+ /*
+  // Create an event in Google Calendar with an SMS reminder
+  //cell B2 determines if you want SMS alerts or not
+  if (sheet.getRange("B2").getValue().toLowerCase() == "yes") 
+    CalendarApp.createEvent(msg, now, now).addSmsReminder(0); 
+    */
+}
